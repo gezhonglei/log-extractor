@@ -1,8 +1,7 @@
-package com.gezhonglei.common.log.analyzer;
+package com.gezhonglei.common.log.extractor;
 
 import static org.junit.Assert.*;
 
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

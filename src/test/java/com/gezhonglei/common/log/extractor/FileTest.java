@@ -1,4 +1,4 @@
-package com.gezhonglei.common.log.analyzer;
+package com.gezhonglei.common.log.extractor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,9 +17,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import org.junit.Test;
 
-import com.gezhonglei.common.log.extractor.config.ParserConfig;
 import com.gezhonglei.common.util.FileUtil;
-import com.gezhonglei.common.util.JsonUtil;
 
 public class FileTest {
 	// 以File作为输入源File->FileReader
@@ -108,7 +106,7 @@ public class FileTest {
 		String content = FileUtil.getAllContent(file, "UTF-8");
 		System.out.println(content);
 		
-		ParserConfig config = JsonUtil.fromJson(content, ParserConfig.class);
+		//ParserConfig config = JsonUtil.fromJson(content, ParserConfig.class);
 	}
 	
 	@Test 

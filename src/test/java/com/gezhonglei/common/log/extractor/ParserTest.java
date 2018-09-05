@@ -1,4 +1,4 @@
-package com.gezhonglei.common.log.analyzer;
+package com.gezhonglei.common.log.extractor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,12 +91,12 @@ public class ParserTest {
 		json = JsonUtil.toJson(entities2);
 		System.out.println(JsonUtil.format(json, "    "));
 		
-		for (Entity entity : entities) {
-			Map<String, Object> map = entity.getProps();
-			String key = (String) map.get("id");
-			for (Entity e2 : entities2) {
-				
-			}
-		}
+//		for (Entity entity : entities) {
+//			Map<String, Object> map = entity.getProps();
+//			String key = (String) map.get("id");
+//			for (Entity e2 : entities2) {
+//				
+//			}
+//		}
 	}
 }
