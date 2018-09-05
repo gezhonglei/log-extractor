@@ -1,0 +1,96 @@
+{
+	"path": null,
+    "filter": "*.log",
+    "commonproperties": {
+        "logtime": {
+        	"type": "date",
+        	"format": "yyyy-MM-dd HH:mm:ss,SSS",
+        	"mod": "regex",
+            "regex": "\\s(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s",
+            "groupIndex": "1"
+        },
+        "id": {
+        	"type": "string",
+            "beginText": "id=",
+            "endText": ",",
+            "leftIncluded": false,
+            "rightIncluded": false
+        }
+    },
+    "rules": [{
+        "name": "sendCmd",
+        "matchText": "sendRequest: cmd=\\((con|disc)\\)",
+        "useRegex": true,
+        "ignoreCase": false,
+        "props": {
+            "cmd": {
+                "beginSkip": 0, 
+                "beginText": "cmd=",
+                "endText": ","
+            },
+            "id": {
+                "beginIndex": 0,
+                "endIndex": 0
+            },
+            "id2": {
+                "beginIndex": 0,
+                "length": 0
+            },
+            "id3": {
+                "beginText": "id=",
+                "endText": ",",
+                "leftIncluded": false,
+                "rightIncluded": false
+            },
+            "ipAndPort": {
+                "beginText": "ip=",
+                "endText": ",",
+                "leftIncluded": false,
+                "rightIncluded": false
+            },
+            "addr": {
+                "beginText": "<Addr=",
+                "length": ">",
+                "leftIncluded": false,
+                "rightIncluded": false
+            }
+        }
+    }, {
+        "name": "intercepted",
+        "matchText": "sendRequest: socket=",
+        "useRegex": false,
+        "ignoreCase": false
+    }, {
+        "name": "requestTimeout",
+        "matchText": "RequestEntryTime:",
+        "useRegex": false,
+        "ignoreCase": false
+    }, {
+        "name": "excuted",
+        "matchText": "execute\\((con|disc)\\)",
+        "useRegex": true,
+        "ignoreCase": false,
+        "props": {
+            "totalCost": {
+                "beginText": "totalCost=",
+                "endText": ","
+            },
+            "sendCost": {
+                "beginText": "sendCost=",
+                "endText": ","
+            },
+            "recvCost": {
+                "beginText": "recvCost=",
+                "endText": ","
+            },
+            "send": {
+                "beginText": "send=",
+                "endText": ","
+            },
+            "recv": {
+                "beginText": "recv=",
+                "endText": ","
+            }
+        }
+    }]
+}
