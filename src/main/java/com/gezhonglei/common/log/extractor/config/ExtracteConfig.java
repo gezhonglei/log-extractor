@@ -3,11 +3,12 @@ package com.gezhonglei.common.log.extractor.config;
 import java.util.List;
 import java.util.Map;
 
-public class ParserConfig {
+public class ExtracteConfig {
 	private String path;
 	private String filter;
 	private List<EntityRule> rules;
 	private Map<String, IPropRule> commonPropRules;
+	private List<OutputRule> output;
 	
 	private String encode = "UTF-8";
 	private int bufferSize = 1024;  // KB
@@ -49,7 +50,15 @@ public class ParserConfig {
 	public void setBufferSize(int bufferSize) {
 		this.bufferSize = bufferSize;
 	}
+	public List<OutputRule> getOutput() {
+		return output;
+	}
+	public void setOutput(List<OutputRule> output) {
+		this.output = output;
+	}
 
 	
-	
+	public EntityRule getRule(String name) {
+		return this.rules.stream().filter(p-> p.getName().equals(name)).findFirst().orElse(null);
+	}
 }

@@ -20,23 +20,23 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gezhonglei.common.log.extractor.config.ParserConfig;
+import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
 import com.gezhonglei.common.log.extractor.entity.Entity;
 import com.gezhonglei.common.log.extractor.entity.ParseResult;
 import com.gezhonglei.common.log.extractor.entity.Result;
 
-public class LogParser {
+public class LogExtractor {
 
-	private static Logger logger = LoggerFactory.getLogger(LogParser.class);
+	private static Logger logger = LoggerFactory.getLogger(LogExtractor.class);
 	
 	int coreSize = Runtime.getRuntime().availableProcessors();
 	private ThreadPoolExecutor executor = new ThreadPoolExecutor(coreSize, coreSize, 
 			0,  TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
-	private ParserConfig config;
-	private List<ParseTask> tasks = new LinkedList<>();
+	private ExtracteConfig config;
+	private List<ExtracteTask> tasks = new LinkedList<>();
 	CountDownLatch countDown = null;
 	
-	public LogParser(ParserConfig config) {
+	public LogExtractor(ExtracteConfig config) {
 		this.config = config;
 	}
 	
@@ -56,12 +56,12 @@ public class LogParser {
 	
 	private void createTask(File file) {
 		if(checkNotInList(file)) {
-			this.tasks.add(new ParseTask(file, config, this));
+			this.tasks.add(new ExtracteTask(file, config, this));
 		}
 	}
 
 	private boolean checkNotInList(File file) {
-		for (ParseTask task : tasks) {
+		for (ExtracteTask task : tasks) {
 			if(task.getFile().equals(file)) {
 				return false;
 			}
@@ -95,13 +95,13 @@ public class LogParser {
 
 	private ParseResult getResult() {
 		countDown = new CountDownLatch(tasks.size());
-		for (ParseTask task : tasks) {
+		for (ExtracteTask task : tasks) {
 			executor.submit(task);
 		}
 		ParseResult parseResult = new ParseResult();
 		try {
 			countDown.await();
-			for (ParseTask task : tasks) {
+			for (ExtracteTask task : tasks) {
 				Result result = task.getResult();
 				for (Entity entity : result.getValues()) {
 					parseResult.addEntity(entity.getRuleName(), entity);
@@ -114,7 +114,7 @@ public class LogParser {
 		return parseResult;
 	}
 	
-	public void notify(ParseTask task) {
+	public void notify(ExtracteTask task) {
 		if(countDown != null) {
 			countDown.countDown();
 		}

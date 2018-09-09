@@ -1,7 +1,7 @@
 {
 	"path": null,
     "filter": "*.log",
-    "commonproperties": {
+    "commonprops": {
         "logtime": {
         	"type": "date",
         	"format": "yyyy-MM-dd HH:mm:ss,SSS",
@@ -92,5 +92,27 @@
                 "endText": ","
             }
         }
+    }],
+    "output": [{
+    	"name": "sendCmd"
+    }, {
+    	"name": "excuted"
+    }, {
+    	"name": "sendCmd-join",
+    	"mainRule": "sendCmd",
+    	"mainRuleFieldAlias": {
+    		"logtime": "time",
+    		"total": "totalCost"
+    	}
+    	"joins": [{
+    		"entityRuleName": "excuted",
+    		"keyMapping": {
+	    		"id": "id"
+	    	},
+	    	"fieldAlias": {
+	    		"total": "totalCost",
+	    	}
+    	}],
+    	"fields": ["id", "time", "cmd", "totalCost", "recv"],
     }]
 }

@@ -1,5 +1,6 @@
 package com.gezhonglei.common.log.extractor.entity;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Entity {
@@ -31,5 +32,21 @@ public class Entity {
 	}
 	public void setCommonProps(Map<String, Object> commonProps) {
 		this.commonProps = commonProps;
+	}
+	
+	public Map<String, Object> getAllProps() {
+		Map<String, Object> allProps = new HashMap<>();
+		allProps.putAll(commonProps);
+		allProps.putAll(props);
+		return allProps;
+	}
+	public Object getPropValue(String mainKey) {
+		if(this.props.containsKey(mainKey)) {
+			return this.props.get(mainKey);
+		}
+		if(this.commonProps.containsKey(mainKey)) {
+			return this.commonProps.get(mainKey);
+		}
+		return null;
 	}
 }

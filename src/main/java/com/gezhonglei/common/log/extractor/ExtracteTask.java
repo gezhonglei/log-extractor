@@ -17,22 +17,22 @@ import org.slf4j.LoggerFactory;
 
 import com.gezhonglei.common.log.extractor.config.EntityRule;
 import com.gezhonglei.common.log.extractor.config.IPropRule;
-import com.gezhonglei.common.log.extractor.config.ParserConfig;
+import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
 import com.gezhonglei.common.log.extractor.entity.Entity;
 import com.gezhonglei.common.log.extractor.entity.Result;
 import com.gezhonglei.common.util.StringUtil;
 
-public class ParseTask implements Runnable {
+public class ExtracteTask implements Runnable {
 
-	private Logger logger = LoggerFactory.getLogger(ParseTask.class);
+	private Logger logger = LoggerFactory.getLogger(ExtracteTask.class);
 
 	private File file;
-	private ParserConfig config;
-	private LogParser parser;
+	private ExtracteConfig config;
+	private LogExtractor parser;
 	
 	private Result result;
 	
-	public ParseTask(File file, ParserConfig config, LogParser parser) {
+	public ExtracteTask(File file, ExtracteConfig config, LogExtractor parser) {
 		this.file = file;
 		this.config = config;
 		this.parser = parser;
