@@ -1,5 +1,6 @@
 package com.gezhonglei.common.log.extractor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,30 +13,32 @@ import org.junit.Test;
 import com.gezhonglei.common.log.extractor.LogExtractor;
 import com.gezhonglei.common.log.extractor.config.BoundaryPropRule;
 import com.gezhonglei.common.log.extractor.config.EntityRule;
-import com.gezhonglei.common.log.extractor.config.IPropRule;
+import com.gezhonglei.common.log.extractor.config.PropRule;
 import com.gezhonglei.common.log.extractor.config.JoinRule;
 import com.gezhonglei.common.log.extractor.config.OutputRule;
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
 import com.gezhonglei.common.log.extractor.config.RegexPropRule;
-import com.gezhonglei.common.log.extractor.entity.Entity;
+import com.gezhonglei.common.log.extractor.entity.DataSet;
+import com.gezhonglei.common.log.extractor.entity.DataTable;
 import com.gezhonglei.common.log.extractor.entity.ParseResult;
+import com.gezhonglei.common.util.FileUtil;
 import com.gezhonglei.common.util.JsonUtil;
 
 public class ParserTest {
 	
 	private ExtracteConfig getConfig() {
 		// ----- rule1 -------
-		Map<String, IPropRule> props = new HashMap<>();
+		List<PropRule> props = new ArrayList<>();
 		BoundaryPropRule propRule = new BoundaryPropRule();
 		propRule.setName("cmd");
 		propRule.setBeginText("cmd=");
 		propRule.setEndText(",");
-		props.put("cmd", propRule);
+		props.add(propRule);
 		propRule = new BoundaryPropRule();
 		propRule.setName("id");
 		propRule.setBeginText("id=");
 		propRule.setLength(10);
-		props.put("id", propRule);
+		props.add(propRule);
 		
 		List<EntityRule> rules = new ArrayList<>();
 		EntityRule rule = new EntityRule();
@@ -47,22 +50,22 @@ public class ParserTest {
 		rules.add(rule);
 		
 		// ----- rule2 -------
-		props = new HashMap<>();
+		props = new ArrayList<>();
 		propRule = new BoundaryPropRule();
 		propRule.setName("id");
 		propRule.setBeginText("id=");
 		propRule.setLength(10);
-		props.put("id", propRule);
+		props.add(propRule);
 		propRule = new BoundaryPropRule();
 		propRule.setName("total");
 		propRule.setBeginText("totalCost=");
 		propRule.setEndText(",");
-		props.put(propRule.getName(), propRule);
+		props.add(propRule);
 		propRule = new BoundaryPropRule();
 		propRule.setName("recv");
 		propRule.setBeginText("recv=");
 		propRule.setEndText(",");
-		props.put(propRule.getName(), propRule);
+		props.add(propRule);
 		
 		rule = new EntityRule();
 		rule.setName("executed");
@@ -72,16 +75,17 @@ public class ParserTest {
 		rule.setPropRules(props);
 		rules.add(rule);
 		
-		Map<String, IPropRule> commonPropRules = new HashMap<>();
+		List<PropRule> commonPropRules = new ArrayList<>();
 		RegexPropRule regexProp = new RegexPropRule();
 		regexProp.setRegex("(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s");
 		regexProp.setGroupIndex(1);
 		regexProp.setName("logtime");
-		commonPropRules.put("logtime", regexProp);
+		commonPropRules.add(regexProp);
 		
 		ExtracteConfig config = new ExtracteConfig();
 		String path = ParserTest.class.getClassLoader().getResource("log").getFile();
 		config.setPath(path);
+		config.setOutputPath(path);
 		config.setFilter("*.log");
 		config.setRules(rules);
 		config.setCommonPropRules(commonPropRules);
@@ -91,20 +95,23 @@ public class ParserTest {
 		OutputRule outputRule = new OutputRule("sendCmd");
 		outputs.add(outputRule);
 		
-		outputRule = new OutputRule("excuted");
+		outputRule = new OutputRule("executed");
 		outputs.add(outputRule);
 		
 		outputRule = new OutputRule("sendCmd-join", "sendCmd");
 		Map<String, String> mainRuleFieldAlias = new HashMap<>();
 		mainRuleFieldAlias.put("logtime", "time");
-		mainRuleFieldAlias.put("total", "totalCost");
+		
 		outputRule.setMainRuleFieldAlias(mainRuleFieldAlias);
 		List<JoinRule> joinRules = new LinkedList<>();
 		JoinRule e = new JoinRule();
-		e.setJoinRuleName("excuted");
+		e.setJoinRuleName("executed");
 		Map<String, String> keyMapping = new HashMap<>();
 		keyMapping.put("id", "id");
 		e.setKeyMapping(keyMapping);
+		Map<String, String> fieldAlias = new HashMap<>();
+		fieldAlias.put("total", "totalCost");
+		e.setFieldAlias(fieldAlias);
 		joinRules.add(e);
 		outputRule.setJoinRules(joinRules);
 		List<String> fields = Arrays.asList("id", "time", "cmd", "totalCost", "recv");
@@ -115,49 +122,56 @@ public class ParserTest {
 		return config;
 	}
 	
-	@Test
-	public void testParse() throws Exception {
-		LogExtractor parser = new LogExtractor(getConfig());
+	public void parse(ExtracteConfig config) throws Exception {
+		LogExtractor parser = new LogExtractor(config);
 		ParseResult result = parser.parse();
-		List<Entity> entities = result.getResult("sendCmd");
-		String json = JsonUtil.toJson(entities);
-		System.out.println(JsonUtil.format(json, "    "));
-		
-		List<Entity> entities2 = result.getResult("executed");
-		json = JsonUtil.toJson(entities2);
-		System.out.println(JsonUtil.format(json, "    "));
-		
-		List<Map<String, Object>> results = new ArrayList<>();
-		for (Entity entity : entities) {
-			Map<String, Object> row = new HashMap<>();
-			row.putAll(entity.getProps());
-			row.putAll(entity.getCommonProps());
-			
-			String key = (String) entity.getProps().get("id");
-			for (Entity e2 : entities2) {
-				if(key.equals(e2.getProps().get("id"))) {
-					row.putAll(e2.getProps());
-					e2.getProps().forEach((k,v)-> {
-						row.put("ref-" + k, v);
-					});
-					e2.getCommonProps().forEach((k,v)->{
-						row.put("common-" + k, v);
-					});
-					break;
-				}
-			}
-			results.add(row);
-		}
-		
-		results.get(0).forEach((k,v)-> {
-			System.out.print(k + "\t");
-		});
-		System.out.println();
-		results.forEach(r -> {
-			r.forEach((k,v)-> {
-				System.out.print(v + "\t");
+		parser.writeResult(result);
+
+		DataSet dataSet = new OutputHandler(result, config).handle();
+		for (DataTable table : dataSet.getTables()) {
+			System.out.println("----------" + table.getName() + "-----------");
+			table.getFields().forEach(f-> {
+				System.out.print(f.getName() + "\t");
 			});
+			int size = table.getFields().size();
 			System.out.println();
-		});
+			table.getValues().forEach(row -> {
+				for (int i = 0; i < size; i++) {
+					System.out.print(row.getValue(i) + "\t");
+				}
+				System.out.println();
+			});
+		}
+	}
+
+	@Test
+	public void test03() throws Exception {
+		ExtracteConfig config = getConfig();
+		System.out.println(JsonUtil.toFormatJson(config));
+	}
+	
+	@Test
+	public void test01() throws Exception {
+		parse(getConfig());
+	}
+	
+	@Test
+	public void test02() throws Exception {
+		ExtracteConfig config = getConfigFromFile();
+		System.out.println(JsonUtil.toFormatJson(config));
+		parse(config);
+	}
+	
+	public ExtracteConfig getConfigFromFile() {
+		String file = ParserTest.class.getClassLoader().getResource("config.json").getFile();
+		try {
+			String json = FileUtil.getAllContent(file, "UTF-8");
+			return JsonUtil.fromJson(json, ExtracteConfig.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

@@ -1,7 +1,10 @@
 package com.gezhonglei.common.log.extractor;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -21,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
+import com.gezhonglei.common.log.extractor.entity.DataSet;
+import com.gezhonglei.common.log.extractor.entity.DataTable;
 import com.gezhonglei.common.log.extractor.entity.Entity;
 import com.gezhonglei.common.log.extractor.entity.ParseResult;
 import com.gezhonglei.common.log.extractor.entity.Result;
@@ -52,6 +57,89 @@ public class LogExtractor {
 			walkDirectory(file.getCanonicalPath(), this.config.getFilter());
 		}
 		return getResult();
+	}
+	
+	public void writeResult(ParseResult result) throws IOException {
+		File file = new File(this.config.getOutputPath());
+		if(!file.exists()) {
+			logger.info("not exist file:{}", file);
+			throw new IOException("File or Directory does not exist while writing result");
+		}
+		
+		DataSet dataSet = new OutputHandler(result, config).handle();
+		if(file.isFile()) {
+			
+		} else if(file.isDirectory()) {
+			for (DataTable table : dataSet.getTables()) {
+				File subFile = Paths.get(file.getCanonicalPath(), table.getName()).toFile();
+				try {
+					this.writeDataTableToFile(table, subFile);
+				} catch (IOException e) {
+					// TODO: 
+				}
+			}
+		}
+	}
+	
+	private void writeDataTableToFile(DataTable table, File file) throws IOException {
+		FileOutputStream fos = null;
+		OutputStreamWriter osWriter = null;
+		BufferedWriter bufWriter = null;
+		try {
+			fos = new FileOutputStream(file, false);
+			osWriter = new OutputStreamWriter(fos, config.getEncode());
+			bufWriter = new BufferedWriter(osWriter, config.getBufferSize());
+			final BufferedWriter writer = bufWriter;
+			
+			StringBuilder strBuilder = new StringBuilder();
+			table.getFields().forEach(f-> {
+				strBuilder.append(f.getName() + "\t");
+			});
+			strBuilder.append(System.lineSeparator());
+			this.appendTo(writer, strBuilder.toString());
+			
+			int size = table.getFields().size();
+			table.getValues().forEach(row -> {
+				StringBuilder strBuffer = new StringBuilder();
+				for (int i = 0; i < size; i++) {
+					strBuffer.append(row.getValue(i) + "\t");
+				}
+				strBuffer.append(System.lineSeparator());
+				this.appendTo(writer, strBuffer.toString());
+			});
+			writer.close();
+			osWriter.close();
+			fos.close();
+		} 
+		finally {
+			if(bufWriter != null) {
+				try {
+					bufWriter.close();
+				} catch (IOException e) {
+				}
+			}
+			if(osWriter != null) {
+				try {
+					osWriter.close();
+				} catch (IOException e) {
+				}
+			}
+			if(fos != null) {
+				try {
+					fos.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
+	
+	private boolean appendTo(BufferedWriter writer, String str) {
+		try {
+			writer.append(str);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 	
 	private void createTask(File file) {

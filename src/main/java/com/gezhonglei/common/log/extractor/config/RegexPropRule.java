@@ -3,13 +3,15 @@ package com.gezhonglei.common.log.extractor.config;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class RegexPropRule implements IPropRule {
-	private String name;
-	private String type;
+public class RegexPropRule extends PropRule {
 	private String regex;
 	private int groupIndex;
 	
 	private transient Pattern pattern;
+	
+	public RegexPropRule() {
+		this.mode = ParseMode.Regex.name();
+	}
 	
 	public String getRegex() {
 		return regex;
@@ -26,11 +28,6 @@ public class RegexPropRule implements IPropRule {
 	}
 	
 	@Override
-	public ParseMode mode() {
-		return ParseMode.Regex;
-	}
-	
-	@Override
 	public String extractFrom(String text) {
 		if(pattern != null) {
 			Matcher matcher = pattern.matcher(text);
@@ -41,16 +38,5 @@ public class RegexPropRule implements IPropRule {
 		}
 		return null;
 	}
-	@Override
-	public String getType() {
-		return this.type;
-	}
-	@Override
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	
+
 }

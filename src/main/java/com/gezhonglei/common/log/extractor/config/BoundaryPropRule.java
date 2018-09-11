@@ -2,17 +2,19 @@ package com.gezhonglei.common.log.extractor.config;
 
 import com.gezhonglei.common.util.StringUtil;
 
-public class BoundaryPropRule implements IPropRule {
-	private String name;
-	private String type;
+public class BoundaryPropRule extends PropRule {
 	private int beginSkip;
 	private String beginText;
 	private String endText;
 	private int beginIndex;
 	private int endIndex = -1;
 	private int length;
-	private boolean leftIndelued = false;
-	private boolean rightIndlued = false;
+	private boolean leftIncluded = false;
+	private boolean rightIncluded = false;
+	
+	public BoundaryPropRule() {
+		this.mode = "boundary";
+	}
 	
 	public int getBeginSkip() {
 		return beginSkip;
@@ -44,22 +46,19 @@ public class BoundaryPropRule implements IPropRule {
 	public void setEndIndex(int endIndex) {
 		this.endIndex = endIndex;
 	}
-	public boolean isLeftIndelued() {
-		return leftIndelued;
+	public boolean isLeftIncluded() {
+		return leftIncluded;
 	}
-	public void setLeftIndelued(boolean leftIndelued) {
-		this.leftIndelued = leftIndelued;
+	public void setLeftIncluded(boolean leftIncluded) {
+		this.leftIncluded = leftIncluded;
 	}
-	public boolean isRightIndlued() {
-		return rightIndlued;
+	public boolean isRightIncluded() {
+		return rightIncluded;
 	}
-	public void setRightIndlued(boolean rightIndlued) {
-		this.rightIndlued = rightIndlued;
+	public void setRightIncluded(boolean rightIncluded) {
+		this.rightIncluded = rightIncluded;
 	}
-	@Override
-	public ParseMode mode() {
-		return ParseMode.Boudary;
-	}
+
 	public int getLength() {
 		return length;
 	}
@@ -76,7 +75,7 @@ public class BoundaryPropRule implements IPropRule {
 				index = text.indexOf(this.beginText, index);
 				skip--;
 			}
-			indexFrom = index + (this.leftIndelued ? 0 : this.beginText.length());
+			indexFrom = index + (this.leftIncluded ? 0 : this.beginText.length());
 		} else {
 			index = this.beginIndex;
 			indexFrom = index;
@@ -87,7 +86,7 @@ public class BoundaryPropRule implements IPropRule {
 				if(indexTo == -1) {
 					return null;
 				} else {
-					indexTo += (this.rightIndlued ? endText.length() : 0);
+					indexTo += (this.rightIncluded ? endText.length() : 0);
 				}
 			} else {
 				indexTo = this.length > 0 ? indexFrom + this.length : this.endIndex;
@@ -102,12 +101,5 @@ public class BoundaryPropRule implements IPropRule {
 	@Override
 	public String getType() {
 		return type;
-	}
-	@Override
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
 	}
 }

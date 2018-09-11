@@ -8,6 +8,7 @@ public class DataRow {
 	
 	public DataRow(DataTable table, List<Object> values) {
 		this.table = table;
+		this.values = new Object[table.getFields().size()];
 	}
 	
 	public boolean setValue(String name, Object value) {
@@ -39,7 +40,7 @@ public class DataRow {
 	}
 	
 	public boolean setValue(int fieldIndex, Object value) {
-		if(fieldIndex > 0 && fieldIndex < table.getFields().size()) {
+		if(fieldIndex > -1 && fieldIndex < table.getFields().size()) {
 			// TODO: check value type
 			values[fieldIndex] = value;
 			return true;

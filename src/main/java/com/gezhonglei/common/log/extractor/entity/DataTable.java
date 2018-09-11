@@ -6,7 +6,7 @@ import java.util.List;
 public class DataTable {
 	private String name;
 	private List<Field> fields;
-	private List<DataRow> values;
+	private List<DataRow> values = new ArrayList<>();
 	
 	public DataTable() {}
 	

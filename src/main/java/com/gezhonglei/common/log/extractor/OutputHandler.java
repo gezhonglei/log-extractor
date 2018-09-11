@@ -1,19 +1,9 @@
 package com.gezhonglei.common.log.extractor;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-
-
-
-
-
-
-
-import org.apache.log4j.chainsaw.Main;
 
 import com.gezhonglei.common.log.extractor.config.EntityRule;
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
@@ -49,25 +39,28 @@ public class OutputHandler {
 		DataTable table = new DataTable(outputRule.getName());
 		table.setFields(getFields(outputRule));
 		
-		Map<String, String> fieldToRuleMapping = getFieldToRuleMapping(outputRule);
+		Map<String, FieldMapping> fieldToRuleMapping = getFieldToRuleMapping(outputRule);
 		String mainRuleName = outputRule.getMainRule();
-		List<String> fields = outputRule.getFields();
+		List<String> fields = outputRule.getOutputFields(config);
 		List<Entity> result = parseEntity.getResult(mainRuleName);
+		Object value = null;
 		for (Entity entity : result) {
 			DataRow row = table.newRow();
 			for (int i = 0, len = fields.size(); i < len; i++) {
-				String ruleName = fieldToRuleMapping.get(fields.get(i));
-				if(ruleName != null && ruleName != mainRuleName) {
-					Entity joinEntity = findEntity(entity, outputRule.getJoinRule(ruleName));
-					if(null != joinEntity) {
-//						String value = joinEntity.getPropValue();
+				FieldMapping mapping = fieldToRuleMapping.get(fields.get(i));
+				if(mapping != null) {
+					if(entity.getRuleName().equals(mapping.getRule().getName())) {
+						value = entity.getPropValue(mapping.getPropName());
+						row.setValue(mapping.fieldIndex, value);
+					} else {
+						Entity joinEntity = findEntity(entity, outputRule.getJoinRule(mapping.getRule().getName()));
+						if(null != joinEntity) {
+							value = joinEntity.getPropValue(mapping.getPropName());
+							row.setValue(mapping.fieldIndex, value);
+						}
 					}
 				}
 			}
-//			SetValues(row, entity, outputRule.getMainRuleFieldAlias());
-//			for (JoinRule joinRule : outputRule.getJoinRules()) {
-//				SetValues(row, entity, joinRule);
-//			}
 		}
 		
 		return table;
@@ -90,9 +83,9 @@ public class OutputHandler {
 		});
 	}
 
-	private Map<String, String> getFieldToRuleMapping(OutputRule outputRule) {
-		Map<String, String> results = new HashMap<>();
-		List<String> fields = outputRule.getFields();
+	private Map<String, FieldMapping> getFieldToRuleMapping(OutputRule outputRule) {
+		Map<String, FieldMapping> results = new HashMap<>();
+		List<String> fields = outputRule.getOutputFields(config);
 		String mainRuleName = outputRule.getMainRule();
 		List<JoinRule> joinRules = outputRule.getJoinRules();
 		
@@ -101,43 +94,78 @@ public class OutputHandler {
 			joinRules.forEach(joinRule-> {
 				String ruleName = joinRule.getJoinRuleName();
 				EntityRule rule = config.getRule(ruleName);
-				rule.getPropRules().keySet().forEach(k-> {
-					results.put(k, ruleName);
+				rule.getPropRules().forEach(prop-> {
+					results.put(prop.getName(), new FieldMapping(prop.getName(), rule, prop.getName()));
 				});
 				joinRule.getFieldAlias().forEach((f,alias)-> {
-					results.put(alias, ruleName);
+					results.put(alias, new FieldMapping(alias, rule, f));
 				});
 			});
 		}
 		// add props from mainRule
 		EntityRule rule = config.getRule(mainRuleName);
-		rule.getPropRules().keySet().forEach(k-> {
-			results.put(k, mainRuleName);
+		rule.getPropRules().forEach(prop-> {
+			results.put(prop.getName(), new FieldMapping(prop.getName(), rule, prop.getName()));
 		});
 		outputRule.getMainRuleFieldAlias().forEach((f,alias)-> {
-			results.put(alias, mainRuleName);
+			results.put(alias, new FieldMapping(alias, rule, f));
 		});
-		config.getCommonPropRules().keySet().forEach(k-> {
-			results.put(k, mainRuleName);
+		config.getCommonPropRules().forEach(prop-> {
+			results.put(prop.getName(), new FieldMapping(prop.getName(), rule, prop.getName()));
 		});
 		// remove non-output fields
 		for (String field : fields) {
 			if(!results.containsKey(field)) {
 				results.remove(field);
+			} else {
+				results.get(field).setFieldIndex(fields.indexOf(field));
 			}
 		}
 		return results;
 	}
 	
-	private void SetValues(DataRow row, Entity entity, JoinRule joinRule) {
-		
-	}
-
-	private void SetValues(DataRow row, Entity entity, Map<String, String> fieldAlias) {
-		
-	}
-
 	private List<Field> getFields(OutputRule outputRule) {
-		return outputRule.getFields().stream().map(Field::new).collect(Collectors.toList());
+		return outputRule.getOutputFields(config).stream().map(Field::new).collect(Collectors.toList());
+	}
+	
+	static class FieldMapping {
+		private String field;
+		private int fieldIndex;
+		private EntityRule rule;
+		private String propName;
+		
+		public FieldMapping(String field, EntityRule rule, String propName) {
+			super();
+			this.field = field;
+			this.rule = rule;
+			this.propName = propName;
+		}
+		
+		public String getField() {
+			return field;
+		}
+		public void setField(String field) {
+			this.field = field;
+		}
+		public EntityRule getRule() {
+			return rule;
+		}
+		public void setRule(EntityRule rule) {
+			this.rule = rule;
+		}
+		public String getPropName() {
+			return propName;
+		}
+		public void setPropName(String propName) {
+			this.propName = propName;
+		}
+
+		public int getFieldIndex() {
+			return fieldIndex;
+		}
+
+		public void setFieldIndex(int fieldIndex) {
+			this.fieldIndex = fieldIndex;
+		}
 	}
 }

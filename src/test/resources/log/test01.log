@@ -1,5 +1,6 @@
-2018-09-04 01:59:30,269 ERROR [main] [com.gezhonglei.common.log.InnerLogger.debug(37)] sendRequest: cmd=con, id=3382043001, flag=192.168.3.24:3220:1, msg=AAAAAAAAAAA
-2018-09-04 01:59:30,687 ERROR [main] [com.gezhonglei.common.log.InnerLogger.debug(37)] execute(con): id=3382043001, totalCost=200ms, sendCost=50ms, recvCost=150ms, send=xxxxx, recv=xxxxxxx, exception=java.lang.IOException, msg=Read timeout.
-2018-09-04 01:59:31,691 ERROR [main] [com.gezhonglei.common.log.InnerLogger.debug(37)] sendRequest: cmd=disc, id=3382043002, flag=aa, msg=AAAAAAAAAAA
-2018-09-04 01:59:30,687 ERROR [main] [com.gezhonglei.common.log.InnerLogger.debug(37)] execute(disc): id=3382043002, totalCost=200ms, sendCost=50ms, recvCost=150ms, exception=null, msg=.
-2018-09-04 01:59:30,687 ERROR [main] [com.gezhonglei.common.log.InnerLogger.debug(37)] execute(get): id=3382043010, totalCost=200ms, sendCost=50ms, recvCost=150ms, send=xxxxx, recv=xxxxxxx, exception=null, msg=.
+2018-09-04 01:59:30,269 ERROR [main] [com.gezhonglei.common.log.TestLog.test01(37)] sendRequest: cmd=con, id=3382043001, tag=192.168.3.24:3220:1, params=[<addr=1>,<param1=123>,<param2=aaaa>]
+2018-09-04 01:59:30,687 ERROR [main] [com.gezhonglei.common.log.TestLog.test01(37)] execute(con): id=3382043001, totalCost=203ms, sendCost=50ms, recvCost=150ms, send=0102 3321 0001, recv=0102 0001 0002 0003, exception=java.lang.IOException, msg=Read timeout.
+2018-09-04 01:59:31,691 ERROR [main] [com.gezhonglei.common.log.TestLog.test01(37)] sendRequest: cmd=disc, id=3382043002, tag=192.168.3.24:3220:2, , params=[<addr=2>,<param1=123>,<param2=bbb>]
+2018-09-04 01:59:30,687 ERROR [main] [com.gezhonglei.common.log.TestLog.test01(37)] execute(disc): id=3382043002, totalCost=200ms, sendCost=50ms, recvCost=150ms, send=0202 3321 0003, recv=FE03 0308 2333 FD, exception=null, msg=.
+2018-09-04 01:59:31,691 ERROR [main] [com.gezhonglei.common.log.TestLog.test01(37)] sendRequest: cmd=get, id=3382043003, tag=192.168.3.24:3220:1, , params=[<addr=1>,<param1=123>,<param2=ccc>]
+2018-09-04 01:59:30,687 ERROR [main] [com.gezhonglei.common.log.TestLog.test01(37)] execute(get): id=3382043003, totalCost=200ms, sendCost=50ms, recvCost=150ms, send=0102 3321 0003, recv=xxxxxxx, exception=null, msg=.

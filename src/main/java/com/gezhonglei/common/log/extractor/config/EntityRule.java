@@ -1,16 +1,23 @@
 package com.gezhonglei.common.log.extractor.config;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 public class EntityRule {
 	private String name;
 	private String matchText;
 	private boolean useRegex;
 	private boolean ignoreCase;
-	private Map<String, IPropRule> propRules;
+	@JsonProperty("props")
+	private List<PropRule> propRules;
 	
-	private transient Pattern pattern;
+	@JsonIgnore
+	private Pattern pattern;
 	
 	public String getName() {
 		return name;
@@ -30,7 +37,7 @@ public class EntityRule {
 //		} else {
 //			pattern = null;
 //		}
-		return !this.useRegex ? null : pattern == null ? Pattern.compile(matchText) : pattern;
+		return !this.useRegex ? null : pattern == null ? (pattern=Pattern.compile(matchText)) : pattern;
 	}
 	
 	public void setMatchText(String matchText) {
@@ -51,12 +58,10 @@ public class EntityRule {
 	public void setIgnoreCase(boolean ignoreCase) {
 		this.ignoreCase = ignoreCase;
 	}
-	public Map<String, IPropRule> getPropRules() {
-		return propRules;
+	public List<PropRule> getPropRules() {
+		return Optional.ofNullable(propRules).orElseGet(ArrayList::new);
 	}
-	public void setPropRules(Map<String, IPropRule> props) {
+	public void setPropRules(List<PropRule> props) {
 		this.propRules = props;
 	}
-	
-	
 }

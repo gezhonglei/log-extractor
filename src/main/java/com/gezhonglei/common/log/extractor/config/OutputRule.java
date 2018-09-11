@@ -1,12 +1,23 @@
 package com.gezhonglei.common.log.extractor.config;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OutputRule {
+	private static Logger logger = LoggerFactory.getLogger(OutputRule.class);
+	
 	private String name;
 	private String mainRule;
 	private Map<String, String> mainRuleFieldAlias;
+	@JsonProperty("joins")
 	private List<JoinRule> joinRules;
 	private List<String> fields;
 
@@ -31,14 +42,14 @@ public class OutputRule {
 	}
 
 	public List<String> getFields() {
-		return fields;
+		return Optional.ofNullable(fields).orElseGet(ArrayList::new);
 	}
 	public void setFields(List<String> fields) {
 		this.fields = fields;
 	}
 
 	public String getMainRule() {
-		return mainRule;
+		return Optional.ofNullable(mainRule).orElse(name);
 	}
 
 	public void setMainRule(String mainRule) {
@@ -46,7 +57,7 @@ public class OutputRule {
 	}
 
 	public Map<String, String> getMainRuleFieldAlias() {
-		return mainRuleFieldAlias;
+		return Optional.ofNullable(mainRuleFieldAlias).orElseGet(HashMap::new);
 	}
 
 	public void setMainRuleFieldAlias(Map<String, String> mainRuleFieldAlias) {
@@ -54,7 +65,7 @@ public class OutputRule {
 	}
 
 	public List<JoinRule> getJoinRules() {
-		return joinRules;
+		return Optional.ofNullable(joinRules).orElseGet(ArrayList::new);
 	}
 
 	public void setJoinRules(List<JoinRule> joinRules) {
@@ -63,5 +74,20 @@ public class OutputRule {
 	
 	public JoinRule getJoinRule(String name) {
 		return joinRules.stream().filter(p-> p.getJoinRuleName().equals(name)).findFirst().orElse(null);
+	}
+	
+	public List<String> getOutputFields(ExtracteConfig config) {
+		List<String> fields = getFields();
+		if(fields.isEmpty()) {
+			String mainRule = getMainRule();
+			EntityRule rule = config.getRule(mainRule);
+			if(rule != null) {
+				fields.addAll(rule.getPropRules().stream().map(p-> p.getName()).collect(Collectors.toList()));
+				fields.addAll(config.getCommonPropRules().stream().map(p-> p.getName()).collect(Collectors.toList()));
+			} else {
+				logger .error("The rule {} does not exist!", mainRule);
+			}
+		}
+		return fields;
 	}
 }

@@ -1,5 +1,6 @@
 package com.gezhonglei.common.util;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,10 +39,21 @@ public class JsonUtil {
 		return (T)obj;
 	}
 	
+	public static String toFormatJson(Object object) {
+		String json = null;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+		}  catch (IOException e) {
+			e.printStackTrace();
+		}
+		return json;
+	}
+
 	public static String format(String jsonStr) {
 		return format(jsonStr, "\t");
 	}
-
+	
 	public static String format(String jsonStr, String space) {
 		if (null == jsonStr || "".equals(jsonStr))
 			return "";
@@ -58,18 +70,32 @@ public class JsonUtil {
 			last = current;
 			current = jsonStr.charAt(i);
 			switch (current) {
+			case ':':
+				if(!quota) {
+					sb.append(current).append(' ');
+				}
+				break;
 			case '{':
 			case '[':
 				sb.append(current);
-				sb.append('\n');
-				indent++;
-				addIndentBlank(sb, space, indent);
+				if(!quota) {
+					indent++;
+					//sb.append('\n');
+					//addIndentBlank(sb, space, indent);
+				}
 				break;
 			case '}':
 			case ']':
-				sb.append('\n');
-				indent--;
-				addIndentBlank(sb, space, indent);
+				if(!quota) {
+					if((current == '}' && last == '{') || (current == ']' && last == '[')) {
+						indent--;
+						sb.append(current);
+						break;
+					}
+					indent--;
+					sb.append('\n');
+					addIndentBlank(sb, space, indent);
+				}
 				sb.append(current);
 				break;
 			case ',':
@@ -80,6 +106,10 @@ public class JsonUtil {
 				}
 				break;
 			default:
+				if(!quota && (last == '{' || last == '[')) {
+					sb.append('\n');
+					addIndentBlank(sb, space, indent);
+				} 
 				if('"' == current) {
 					quota = !quota;
 				}
@@ -115,41 +145,5 @@ public class JsonUtil {
 		map = new HashMap<String,Object>();
 		map = (Map<String, Object>) JsonUtil.fromJson(json, Map.class);
 		System.out.println("Object:" + map);
-
-		Custom custom = null;
-		custom = (Custom) JsonUtil.fromJson(json, Custom.class);
-		System.out.println(custom);
-		
-		json = JsonUtil.toJson(custom);
-		System.out.println(json);
 	}
-	
-	
 }
-
-class Custom{
-		String name;
-		int num;
-		public Custom(){
-			
-		}
-		public Custom(String name,int num){
-			this.name = name;
-			this.num = num;
-		}
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-		public int getNum() {
-			return num;
-		}
-		public void setNum(int num) {
-			this.num = num;
-		}
-		public String toString(){
-			return this.getClass().getName() + ":name=" + name + ",num=" + num; 
-		}
-	}

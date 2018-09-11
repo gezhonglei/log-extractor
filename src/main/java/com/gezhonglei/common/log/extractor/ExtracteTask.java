@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gezhonglei.common.log.extractor.config.EntityRule;
-import com.gezhonglei.common.log.extractor.config.IPropRule;
+import com.gezhonglei.common.log.extractor.config.PropRule;
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
 import com.gezhonglei.common.log.extractor.entity.Entity;
 import com.gezhonglei.common.log.extractor.entity.Result;
@@ -112,17 +112,15 @@ public class ExtracteTask implements Runnable {
 				entity.setRuleName(rule.getName());
 				
 				String value;
-				Map<String, IPropRule> commonRules = config.getCommonPropRules();
 				Map<String, Object> commonProps = new HashMap<>();
-				for (IPropRule commonProp : commonRules.values()) {
+				for (PropRule commonProp : config.getCommonPropRules()) {
 					value = commonProp.extractFrom(lineText);
 					commonProps.put(commonProp.getName(), value);
 				}
 				entity.setCommonProps(commonProps);
 				
-				Map<String, IPropRule> propRules = rule.getPropRules();
 				Map<String, Object> props = new HashMap<>();
-				for (IPropRule propRule : propRules.values()) {
+				for (PropRule propRule : rule.getPropRules()) {
 					value = propRule.extractFrom(lineText);
 					props.put(propRule.getName(), value);
 				}

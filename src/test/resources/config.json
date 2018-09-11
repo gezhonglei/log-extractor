@@ -1,118 +1,111 @@
 {
-	"path": null,
+    "path": "/E:/EclipseWorkspace/Commons/log-extractor/target/test-classes/log",
     "filter": "*.log",
-    "commonprops": {
-        "logtime": {
-        	"type": "date",
-        	"format": "yyyy-MM-dd HH:mm:ss,SSS",
-        	"mod": "regex",
-            "regex": "\\s(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s",
-            "groupIndex": "1"
-        },
-        "id": {
-        	"type": "string",
+    "outputPath": "/E:/EclipseWorkspace/Commons/log-extractor/target/test-classes/log",
+    "commonProps": [
+        { 
+        	"name": "logtime",
+            "type": "date",
+            "format": "yyyy-MM-dd HH:mm:ss,SSS",
+            "mode": "regex",
+            "regex": "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s",
+            "groupIndex": 1
+        }, 
+        {
+        	"name": "id",
+            "type": "string",
             "beginText": "id=",
-            "endText": ",",
-            "leftIncluded": false,
-            "rightIncluded": false
+            "endText": ","
         }
-    },
-    "rules": [{
-        "name": "sendCmd",
-        "matchText": "sendRequest: cmd=\\((con|disc)\\)",
-        "useRegex": true,
-        "ignoreCase": false,
-        "props": {
-            "cmd": {
-                "beginSkip": 0, 
-                "beginText": "cmd=",
-                "endText": ","
-            },
-            "id": {
-                "beginIndex": 0,
-                "endIndex": 0
-            },
-            "id2": {
-                "beginIndex": 0,
-                "length": 0
-            },
-            "id3": {
-                "beginText": "id=",
-                "endText": ",",
-                "leftIncluded": false,
-                "rightIncluded": false
-            },
-            "ipAndPort": {
-                "beginText": "ip=",
-                "endText": ",",
-                "leftIncluded": false,
-                "rightIncluded": false
-            },
-            "addr": {
-                "beginText": "<Addr=",
-                "length": ">",
-                "leftIncluded": false,
-                "rightIncluded": false
-            }
+    ],
+    "rules": [
+        {
+            "name": "sendCmd",
+            "matchText": "sendRequest: cmd=(con|disc)",
+            "useRegex": true,
+            "ignoreCase": false,
+            "props": [
+                {
+                	"name": "cmd",
+                    "beginSkip": 0,
+                    "beginText": "cmd=",
+                    "endText": ","
+                },
+                {
+                	"name": "addr",
+                    "beginText": "<addr=",
+                    "endText": ">",
+                    "leftIncluded": false,
+                    "rightIncluded": false
+                }
+            ]
+        },
+        {
+            "name": "executed",
+            "matchText": "execute\\((con|disc)\\)",
+            "useRegex": true,
+            "ignoreCase": false,
+            "props": [
+                {
+                	"name": "total",
+                    "beginText": "totalCost=",
+                    "endText": ","
+                },
+                {
+                	"name": "sendCost",
+                    "beginText": "sendCost=",
+                    "endText": ","
+                },
+                {
+                	"name": "recvCost",
+                    "beginText": "recvCost=",
+                    "endText": ","
+                },
+                {
+                	"name": "send",
+                    "beginText": "send=",
+                    "endText": ","
+                }, 
+                {
+                	"name": "recv",
+                    "beginText": "recv=",
+                    "endText": ","
+                }
+            ]
         }
-    }, {
-        "name": "intercepted",
-        "matchText": "sendRequest: socket=",
-        "useRegex": false,
-        "ignoreCase": false
-    }, {
-        "name": "requestTimeout",
-        "matchText": "RequestEntryTime:",
-        "useRegex": false,
-        "ignoreCase": false
-    }, {
-        "name": "excuted",
-        "matchText": "execute\\((con|disc)\\)",
-        "useRegex": true,
-        "ignoreCase": false,
-        "props": {
-            "totalCost": {
-                "beginText": "totalCost=",
-                "endText": ","
+    ],
+    "output": [
+        {
+            "name": "sendCmd"
+        },
+        {
+            "name": "executed"
+        }, 
+        {
+            "name": "sendCmd-join",
+            "mainRule": "sendCmd",
+            "mainRuleFieldAlias": {
+                "logtime": "time"
             },
-            "sendCost": {
-                "beginText": "sendCost=",
-                "endText": ","
-            },
-            "recvCost": {
-                "beginText": "recvCost=",
-                "endText": ","
-            },
-            "send": {
-                "beginText": "send=",
-                "endText": ","
-            },
-            "recv": {
-                "beginText": "recv=",
-                "endText": ","
-            }
+            "joins": [
+                { 
+                    "joinRuleName": "executed",
+                    "keyMapping": {
+                        "id": "id"
+                    },
+                    "fieldAlias": {
+                        "total": "totalCost"
+                    }
+                }
+            ],
+            "fields": [
+                "id",
+                "time",
+                "cmd",
+                "totalCost",
+                "recv",
+                "send"
+            ]
         }
-    }],
-    "output": [{
-    	"name": "sendCmd"
-    }, {
-    	"name": "excuted"
-    }, {
-    	"name": "sendCmd-join",
-    	"mainRule": "sendCmd",
-    	"mainRuleFieldAlias": {
-    		"logtime": "time",
-    		"total": "totalCost"
-    	}
-    	"joins": [{
-    		"entityRuleName": "excuted",
-    		"keyMapping": {
-	    		"id": "id"
-	    	},
-	    	"fieldAlias": {
-	    		"total": "totalCost",
-	    	}
-    	}],
-    	"fields": ["id", "time", "cmd", "totalCost", "recv"],
-    }]
+    ]
 }

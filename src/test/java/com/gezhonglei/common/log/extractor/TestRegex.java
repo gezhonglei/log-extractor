@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
+import com.gezhonglei.common.log.extractor.config.ParseMode;
+
 public class TestRegex {
 	
 	@Test
@@ -27,5 +29,14 @@ public class TestRegex {
 		for (int i = 0; i <= groupCount; i++) {
 			System.out.println(matcher.group(i));
 		}
+	}
+	
+	@Test
+	public void test02() {
+		System.out.println(ParseMode.Boundary);
+		String name = "boundary";
+//		System.out.println(ParseMode.valueOf(name));
+//		System.out.println(Enum.valueOf(ParseMode.class, name));
+		
 	}
 }
