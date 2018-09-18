@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +21,7 @@ import com.gezhonglei.common.log.extractor.config.PropRule;
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
 import com.gezhonglei.common.log.extractor.entity.Entity;
 import com.gezhonglei.common.log.extractor.entity.Result;
+import com.gezhonglei.common.util.ArrayUtil;
 import com.gezhonglei.common.util.StringUtil;
 
 public class ExtracteTask implements Runnable {
@@ -40,6 +42,7 @@ public class ExtracteTask implements Runnable {
 
 	@Override
 	public void run() {
+		logger.debug("begin parse: {}", file);
 		int status = 0;
 		String message = null;
 		List<Entity> values = new ArrayList<>();
@@ -79,6 +82,7 @@ public class ExtracteTask implements Runnable {
 			logger.error("ParseTask error:{}", ex.getMessage());
 		}
 		finally {
+			logger.debug("end parse: {}", file);
 			result = new Result(status, values, message);
 			parser.notify(this);
 		}
@@ -88,22 +92,33 @@ public class ExtracteTask implements Runnable {
 		List<Entity> values = new ArrayList<>();
 		if(StringUtil.isEmpty(lineText)) return values;
 		
-		boolean matched = false;
+		boolean matched = false, matchedTextMode = false;
+		int matchedCount = 0;
 		for (EntityRule rule : this.config.getRules()) {
 			matched = false;
-			if(StringUtil.isEmpty(rule.getMatchText())) continue;
+			matchedTextMode = StringUtil.isEmpty(rule.getMatchText());
+			if(!matchedTextMode && ArrayUtil.isEmpty(rule.getMatchTexts())) {
+				continue;
+			}
 			
 			if(rule.isUseRegex()) {
 				Pattern pattern = rule.getPattern();
 				Matcher matcher = pattern.matcher(lineText);
 				matched = matcher.find();
 			} else {
-				String findStr = rule.getMatchText();
+				matchedCount = 0;
+				List<String> matchedTexts = matchedTextMode ? Arrays.asList(rule.getMatchText()) :
+					Arrays.asList(rule.getMatchTexts());
 				if(rule.isIgnoreCase()) {
-					matched = lineText.toUpperCase(Locale.US).contains(findStr.toUpperCase(Locale.US));
-				} else {
-					matched = lineText.contains(findStr);
+					lineText = lineText.toUpperCase(Locale.US);
 				}
+				for (String findStr : matchedTexts) {
+					findStr = rule.isIgnoreCase() ? findStr.toUpperCase(Locale.US) : findStr;
+					if(lineText.contains(findStr)) {
+						matchedCount++;
+					}
+				}
+				matched = matchedCount == matchedTexts.size();
 			}
 			
 			if(matched) {

@@ -11,6 +11,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class EntityRule {
 	private String name;
 	private String matchText;
+	private String[] matchTexts;
 	private boolean useRegex;
 	private boolean ignoreCase;
 	@JsonProperty("props")
@@ -63,5 +64,11 @@ public class EntityRule {
 	}
 	public void setPropRules(List<PropRule> props) {
 		this.propRules = props;
+	}
+	public String[] getMatchTexts() {
+		return matchTexts;
+	}
+	public void setMatchTexts(String[] matchTexts) {
+		this.matchTexts = matchTexts;
 	}
 }

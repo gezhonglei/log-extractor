@@ -66,29 +66,34 @@ public class LogExtractor {
 			throw new IOException("File or Directory does not exist while writing result");
 		}
 		
+		logger.debug("Data merge begin");
 		DataSet dataSet = new OutputHandler(result, config).handle();
-		if(file.isFile()) {
-			
-		} else if(file.isDirectory()) {
-			for (DataTable table : dataSet.getTables()) {
+		logger.debug("Data merge end");
+		
+		for (DataTable table : dataSet.getTables()) {
+			if(file.isFile()) {
+				this.writeDataTableToFile(table, file);
+			} else if(file.isDirectory()) {
 				File subFile = Paths.get(file.getCanonicalPath(), table.getName()).toFile();
 				try {
 					this.writeDataTableToFile(table, subFile);
 				} catch (IOException e) {
-					// TODO: 
+					logger.error("write result error", e);
 				}
 			}
 		}
+		
 	}
 	
 	private void writeDataTableToFile(DataTable table, File file) throws IOException {
+		logger.debug("begin wirte: {}", table.getName());
 		FileOutputStream fos = null;
 		OutputStreamWriter osWriter = null;
 		BufferedWriter bufWriter = null;
 		try {
 			fos = new FileOutputStream(file, false);
 			osWriter = new OutputStreamWriter(fos, config.getEncode());
-			bufWriter = new BufferedWriter(osWriter, config.getBufferSize());
+			bufWriter = new BufferedWriter(osWriter, config.getBufferSize() * 1024);
 			final BufferedWriter writer = bufWriter;
 			
 			StringBuilder strBuilder = new StringBuilder();
@@ -130,6 +135,7 @@ public class LogExtractor {
 				} catch (IOException e) {
 				}
 			}
+			logger.debug("end wirte: {}", table.getName());
 		}
 	}
 	
@@ -189,6 +195,7 @@ public class LogExtractor {
 		ParseResult parseResult = new ParseResult();
 		try {
 			countDown.await();
+			logger.info("parse files finished!");
 			for (ExtracteTask task : tasks) {
 				Result result = task.getResult();
 				for (Entity entity : result.getValues()) {
@@ -197,13 +204,14 @@ public class LogExtractor {
 			}
 			tasks.clear();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error("task await error", e);
 		}
 		return parseResult;
 	}
 	
 	public void notify(ExtracteTask task) {
 		if(countDown != null) {
+			logger.info("progress: {}/{}", tasks.size() - countDown.getCount(), tasks.size());
 			countDown.countDown();
 		}
 	}
