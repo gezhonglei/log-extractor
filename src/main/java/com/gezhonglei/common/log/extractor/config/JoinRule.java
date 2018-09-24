@@ -1,6 +1,8 @@
 package com.gezhonglei.common.log.extractor.config;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class JoinRule {
 	private String joinRuleName;
@@ -14,13 +16,13 @@ public class JoinRule {
 		this.joinRuleName = joinRuleName;
 	}
 	public Map<String, String> getKeyMapping() {
-		return keyMapping;
+		return Optional.ofNullable(keyMapping).orElseGet(HashMap::new);
 	}
 	public void setKeyMapping(Map<String, String> keyMapping) {
 		this.keyMapping = keyMapping;
 	}
 	public Map<String, String> getFieldAlias() {
-		return fieldAlias;
+		return Optional.ofNullable(fieldAlias).orElseGet(HashMap::new);
 	}
 	public void setFieldAlias(Map<String, String> fieldAlias) {
 		this.fieldAlias = fieldAlias;

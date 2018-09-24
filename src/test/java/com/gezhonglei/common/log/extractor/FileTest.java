@@ -110,7 +110,7 @@ public class FileTest {
 	}
 	
 	@Test 
-	public void testJson() {
+	public void generateTestData() {
 		
 	}
 }

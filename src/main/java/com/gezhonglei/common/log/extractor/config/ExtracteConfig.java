@@ -1,7 +1,9 @@
 package com.gezhonglei.common.log.extractor.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -63,7 +65,6 @@ public class ExtracteConfig {
 	public void setOutput(List<OutputRule> output) {
 		this.output = output;
 	}
-
 	
 	public EntityRule getRule(String name) {
 		return this.rules.stream().filter(p-> p.getName().equals(name)).findFirst().orElse(null);
@@ -74,5 +75,15 @@ public class ExtracteConfig {
 	}
 	public void setOutputPath(String outputPath) {
 		this.outputPath = outputPath;
+	}
+	
+	public Map<String, PropRule> getAllPropRule(String ruleName) {
+		EntityRule rule = getRule(ruleName);
+		Map<String, PropRule> propRules = new HashMap<>();
+		if(rule != null) {
+			this.commonPropRules.forEach(p-> propRules.put(p.getName(), p));
+			rule.getPropRules().forEach(p-> propRules.put(p.getName(), p));
+		}
+		return propRules;
 	}
 }

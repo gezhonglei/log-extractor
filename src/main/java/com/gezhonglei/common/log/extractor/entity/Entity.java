@@ -6,8 +6,7 @@ import java.util.Map;
 public class Entity {
 	private String ruleName;
 	private String source;
-	private Map<String, Object> props;
-	private Map<String, Object> commonProps;
+	private Map<String, Object> props = new HashMap<>();
 	
 	public String getRuleName() {
 		return ruleName;
@@ -27,26 +26,14 @@ public class Entity {
 	public void setProps(Map<String, Object> props) {
 		this.props = props;
 	}
-	public Map<String, Object> getCommonProps() {
-		return commonProps;
-	}
-	public void setCommonProps(Map<String, Object> commonProps) {
-		this.commonProps = commonProps;
-	}
 	
 	public Map<String, Object> getAllProps() {
-		Map<String, Object> allProps = new HashMap<>();
-		allProps.putAll(commonProps);
-		allProps.putAll(props);
-		return allProps;
+		return new HashMap<>(props);
 	}
-	public Object getPropValue(String mainKey) {
-		if(this.props.containsKey(mainKey)) {
-			return this.props.get(mainKey);
-		}
-		if(this.commonProps.containsKey(mainKey)) {
-			return this.commonProps.get(mainKey);
-		}
-		return null;
+	public void setPropValue(String propName, Object value) {
+		this.props.put(propName, value);
+	}
+	public Object getPropValue(String propName) {
+		return this.props.get(propName);
 	}
 }

@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,6 +41,7 @@ public class ExtracteTask implements Runnable {
 
 	@Override
 	public void run() {
+		long beginTime = System.currentTimeMillis();
 		logger.debug("begin parse: {}", file);
 		int status = 0;
 		String message = null;
@@ -82,7 +82,8 @@ public class ExtracteTask implements Runnable {
 			logger.error("ParseTask error:{}", ex.getMessage());
 		}
 		finally {
-			logger.debug("end parse: {}", file);
+			long endTime = System.currentTimeMillis();
+			logger.debug("end parse: {}, size={},cost={}", file, values.size(), endTime - beginTime);
 			result = new Result(status, values, message);
 			parser.notify(this);
 		}
@@ -96,7 +97,7 @@ public class ExtracteTask implements Runnable {
 		int matchedCount = 0;
 		for (EntityRule rule : this.config.getRules()) {
 			matched = false;
-			matchedTextMode = StringUtil.isEmpty(rule.getMatchText());
+			matchedTextMode = !StringUtil.isEmpty(rule.getMatchText());
 			if(!matchedTextMode && ArrayUtil.isEmpty(rule.getMatchTexts())) {
 				continue;
 			}
@@ -127,19 +128,11 @@ public class ExtracteTask implements Runnable {
 				entity.setRuleName(rule.getName());
 				
 				String value;
-				Map<String, Object> commonProps = new HashMap<>();
-				for (PropRule commonProp : config.getCommonPropRules()) {
-					value = commonProp.extractFrom(lineText);
-					commonProps.put(commonProp.getName(), value);
-				}
-				entity.setCommonProps(commonProps);
-				
-				Map<String, Object> props = new HashMap<>();
-				for (PropRule propRule : rule.getPropRules()) {
+				Map<String, PropRule> allPropRule = config.getAllPropRule(rule.getName());
+				for (PropRule propRule : allPropRule.values()) {
 					value = propRule.extractFrom(lineText);
-					props.put(propRule.getName(), value);
+					entity.setPropValue(propRule.getName(), value);
 				}
-				entity.setProps(props);
 				values.add(entity);
 			}
 		}

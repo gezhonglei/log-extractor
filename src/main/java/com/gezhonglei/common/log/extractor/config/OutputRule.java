@@ -80,13 +80,7 @@ public class OutputRule {
 		List<String> fields = getFields();
 		if(fields.isEmpty()) {
 			String mainRule = getMainRule();
-			EntityRule rule = config.getRule(mainRule);
-			if(rule != null) {
-				fields.addAll(rule.getPropRules().stream().map(p-> p.getName()).collect(Collectors.toList()));
-				fields.addAll(config.getCommonPropRules().stream().map(p-> p.getName()).collect(Collectors.toList()));
-			} else {
-				logger .error("The rule {} does not exist!", mainRule);
-			}
+			return config.getAllPropRule(mainRule).keySet().stream().collect(Collectors.toList());
 		}
 		return fields;
 	}

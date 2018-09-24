@@ -6,6 +6,7 @@ import org.codehaus.jackson.annotate.JsonTypeInfo.Id;
 
 @JsonTypeInfo(use=Id.NAME, property="mode", defaultImpl=BoundaryPropRule.class)
 @JsonSubTypes({@JsonSubTypes.Type(value = BoundaryPropRule.class, name = "boundary"), 
+	@JsonSubTypes.Type(value = ConstPropRule.class, name = "const"),
 	@JsonSubTypes.Type(value = RegexPropRule.class, name = "regex")})
 public abstract class PropRule {
 	protected String mode;

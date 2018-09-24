@@ -1,9 +1,8 @@
 package com.gezhonglei.common.log.extractor.config;
 
-import java.util.Arrays;
-
 public enum ParseMode {
 	Boundary("boundary"),
+	Constant("const"),
 	Regex("regex");
 	
 	String value;

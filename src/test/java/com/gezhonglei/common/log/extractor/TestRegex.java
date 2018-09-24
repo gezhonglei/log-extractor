@@ -20,7 +20,7 @@ public class TestRegex {
 		assertEquals(true, matcher.matches());
 		assertEquals(false, matcher.find());
 		
-		value = " SendRequest: cmd=con, ";
+		value = "2018-09-23 12:37:09,484 DEBUG [pool-1-thread-2] [com.gezhonglei.common.log.TestLargeLog$Task.sendRequest(91)] sendRequest: cmd=con, requestId=130000001, isSSL=false, tag=172.168.10.43:3221, params=[<addr=1>, <funCode=1>, <regAddr=0x9812>, <regNum=1>]";
 		matcher = pattern.matcher(value);
 		assertEquals(false, matcher.matches());
 		assertEquals(true, matcher.find());

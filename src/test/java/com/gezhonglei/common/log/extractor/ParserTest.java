@@ -122,12 +122,8 @@ public class ParserTest {
 		return config;
 	}
 	
-	public void parse(ExtracteConfig config) throws Exception {
-		LogExtractor parser = new LogExtractor(config);
-		ParseResult result = parser.parse();
-		parser.writeResult(result);
+	private void print(DataSet dataSet) throws Exception {
 
-		DataSet dataSet = new OutputHandler(result, config).handle();
 		for (DataTable table : dataSet.getTables()) {
 			System.out.println("----------" + table.getName() + "-----------");
 			table.getFields().forEach(f-> {
@@ -152,14 +148,26 @@ public class ParserTest {
 	
 	@Test
 	public void test01() throws Exception {
-		parse(getConfig());
+		ExtracteConfig config = getConfig();
+		LogExtractor parser = new LogExtractor(config);
+		ParseResult result = parser.parse();
+		//parser.writeResult(result);
+		DataSet dataSet = new OutputHandler(result, config).handle2();
+		print(dataSet);
 	}
 	
 	@Test
 	public void test02() throws Exception {
+		long startTime = System.currentTimeMillis();
 		ExtracteConfig config = getConfigFromFile();
 		System.out.println(JsonUtil.toFormatJson(config));
-		parse(config);
+
+		LogExtractor parser = new LogExtractor(config);
+		ParseResult result = parser.parse();
+		parser.writeResult(result);
+		
+		long endTime = System.currentTimeMillis();
+		System.out.println("total cost: " + (endTime - startTime));
 	}
 	
 	public ExtracteConfig getConfigFromFile() {

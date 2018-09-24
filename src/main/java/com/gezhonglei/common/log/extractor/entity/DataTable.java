@@ -46,4 +46,8 @@ public class DataTable {
 	public boolean remove(DataRow row) {
 		return values.remove(row);
 	}
+
+	public int size() {
+		return values.size();
+	}
 }

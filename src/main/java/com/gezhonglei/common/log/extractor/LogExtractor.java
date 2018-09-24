@@ -66,9 +66,11 @@ public class LogExtractor {
 			throw new IOException("File or Directory does not exist while writing result");
 		}
 		
+		long beginTime = System.currentTimeMillis();
 		logger.debug("Data merge begin");
-		DataSet dataSet = new OutputHandler(result, config).handle();
-		logger.debug("Data merge end");
+		DataSet dataSet = new OutputHandler(result, config).handle2();
+		long endTime = System.currentTimeMillis();
+		logger.debug("Data merge end, cost={}", endTime - beginTime);
 		
 		for (DataTable table : dataSet.getTables()) {
 			if(file.isFile()) {
@@ -86,7 +88,8 @@ public class LogExtractor {
 	}
 	
 	private void writeDataTableToFile(DataTable table, File file) throws IOException {
-		logger.debug("begin wirte: {}", table.getName());
+		long beginTime = System.currentTimeMillis();
+		logger.debug("begin wirte: {}, size={}", table.getName(), table.size());
 		FileOutputStream fos = null;
 		OutputStreamWriter osWriter = null;
 		BufferedWriter bufWriter = null;
@@ -135,7 +138,8 @@ public class LogExtractor {
 				} catch (IOException e) {
 				}
 			}
-			logger.debug("end wirte: {}", table.getName());
+			long endTime = System.currentTimeMillis();
+			logger.debug("end wirte: {}, cost={}", table.getName(), endTime - beginTime);
 		}
 	}
 	
@@ -211,7 +215,7 @@ public class LogExtractor {
 	
 	public void notify(ExtracteTask task) {
 		if(countDown != null) {
-			logger.info("progress: {}/{}", tasks.size() - countDown.getCount(), tasks.size());
+			logger.info("progress: {}/{}", tasks.size() - countDown.getCount() + 1, tasks.size());
 			countDown.countDown();
 		}
 	}
