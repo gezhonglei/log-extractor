@@ -11,13 +11,14 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.gezhonglei.common.log.extractor.LogExtractor;
-import com.gezhonglei.common.log.extractor.config.BoundaryPropRule;
 import com.gezhonglei.common.log.extractor.config.EntityRule;
+import com.gezhonglei.common.log.extractor.config.LogSource;
 import com.gezhonglei.common.log.extractor.config.PropRule;
 import com.gezhonglei.common.log.extractor.config.JoinRule;
 import com.gezhonglei.common.log.extractor.config.OutputRule;
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
-import com.gezhonglei.common.log.extractor.config.RegexPropRule;
+import com.gezhonglei.common.log.extractor.config.rule.BoundaryPropRule;
+import com.gezhonglei.common.log.extractor.config.rule.RegexPropRule;
 import com.gezhonglei.common.log.extractor.entity.DataSet;
 import com.gezhonglei.common.log.extractor.entity.DataTable;
 import com.gezhonglei.common.log.extractor.entity.ParseResult;
@@ -84,11 +85,14 @@ public class ParserTest {
 		
 		ExtracteConfig config = new ExtracteConfig();
 		String path = ParserTest.class.getClassLoader().getResource("log").getFile();
-		config.setPath(path);
 		config.setOutputPath(path);
-		config.setFilter("*.log");
-		config.setRules(rules);
-		config.setCommonPropRules(commonPropRules);
+		
+		LogSource source = new LogSource();
+		source.setPath(path);
+		source.setFilter("*.log");
+		source.setRules(rules);
+		source.setCommonPropRules(commonPropRules);
+		config.addSource(source);
 		
 		// Output-Rule
 		List<OutputRule> outputs = new ArrayList<>();

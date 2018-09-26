@@ -1,0 +1,6 @@
+2018-09-24 10:54:40,748 INFO [pool-1-thread-20] [com.gezhonglei.common.log.TestLargeLog.intecepted(98)] Intecepted: no need to send CON or CONTEST cmd, requestId=130090274, tag=172.168.10.22:3224
+2018-09-24 10:54:40,748 INFO [pool-1-thread-20] [com.gezhonglei.common.log.TestLargeLog.intecepted(98)] Intecepted: no need to send CON or CONTEST cmd, requestId=130087962, tag=172.168.10.32:3221
+2018-09-24 10:54:40,749 INFO [pool-1-thread-27] [com.gezhonglei.common.log.TestLargeLog.intecepted(98)] Intecepted: no need to send CON or CONTEST cmd, requestId=130090277, tag=172.168.10.24:3221
+2018-09-24 10:54:40,749 INFO [pool-1-thread-27] [com.gezhonglei.common.log.TestLargeLog.intecepted(98)] Intecepted: no need to send CON or CONTEST cmd, requestId=130090278, tag=172.168.10.43:3221
+2018-09-24 10:54:40,750 INFO [pool-1-thread-27] [com.gezhonglei.common.log.TestLargeLog.intecepted(98)] Intecepted: no need to send CON or CONTEST cmd, requestId=130090279, tag=172.168.10.41:3221
+2018-09-24 10:54:40,750 INFO [pool-1-thread-27] [com.gezhonglei.common.log.TestLargeLog.intecepted(98)] Intecepted: no need to send CON or CONTEST cmd, requestId=130090280, tag=172.168.10.24:3221

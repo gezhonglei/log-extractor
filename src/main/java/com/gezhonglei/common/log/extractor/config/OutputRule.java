@@ -8,14 +8,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OutputRule {
-	private static Logger logger = LoggerFactory.getLogger(OutputRule.class);
-	
 	private String name;
 	private String mainRule;
+	private String outputPath;
 	private Map<String, String> mainRuleFieldAlias;
 	@JsonProperty("joins")
 	private List<JoinRule> joinRules;
@@ -74,6 +71,14 @@ public class OutputRule {
 	
 	public JoinRule getJoinRule(String name) {
 		return joinRules.stream().filter(p-> p.getJoinRuleName().equals(name)).findFirst().orElse(null);
+	}
+	
+	public String getOutputPath() {
+		return this.outputPath;
+	}
+	
+	public void setOutputPath(String outputPath) {
+		this.outputPath = outputPath;
 	}
 	
 	public List<String> getOutputFields(ExtracteConfig config) {

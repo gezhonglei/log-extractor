@@ -5,22 +5,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gezhonglei.common.log.extractor.config.EntityRule;
+import com.gezhonglei.common.log.extractor.config.LogSource;
 import com.gezhonglei.common.log.extractor.config.PropRule;
-import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
 import com.gezhonglei.common.log.extractor.entity.Entity;
 import com.gezhonglei.common.log.extractor.entity.Result;
-import com.gezhonglei.common.util.ArrayUtil;
 import com.gezhonglei.common.util.StringUtil;
 
 public class ExtracteTask implements Runnable {
@@ -28,14 +23,14 @@ public class ExtracteTask implements Runnable {
 	private Logger logger = LoggerFactory.getLogger(ExtracteTask.class);
 
 	private File file;
-	private ExtracteConfig config;
+	private LogSource source;
 	private LogExtractor parser;
 	
 	private Result result;
 	
-	public ExtracteTask(File file, ExtracteConfig config, LogExtractor parser) {
+	public ExtracteTask(File file, LogSource source, LogExtractor parser) {
 		this.file = file;
-		this.config = config;
+		this.source = source;
 		this.parser = parser;
 	}
 
@@ -52,8 +47,8 @@ public class ExtracteTask implements Runnable {
 			BufferedReader bufReader = null;
 			try {
 				fis = new FileInputStream(file);
-				isReader = new InputStreamReader(fis, config.getEncode());
-				bufReader = new BufferedReader(isReader, config.getBufferSize()*1024);
+				isReader = new InputStreamReader(fis, source.getEncode());
+				bufReader = new BufferedReader(isReader, source.getBufferSize()*1024);
 
 				while (true) {
 					String nextline = bufReader.readLine();
@@ -93,42 +88,14 @@ public class ExtracteTask implements Runnable {
 		List<Entity> values = new ArrayList<>();
 		if(StringUtil.isEmpty(lineText)) return values;
 		
-		boolean matched = false, matchedTextMode = false;
-		int matchedCount = 0;
-		for (EntityRule rule : this.config.getRules()) {
-			matched = false;
-			matchedTextMode = !StringUtil.isEmpty(rule.getMatchText());
-			if(!matchedTextMode && ArrayUtil.isEmpty(rule.getMatchTexts())) {
-				continue;
-			}
-			
-			if(rule.isUseRegex()) {
-				Pattern pattern = rule.getPattern();
-				Matcher matcher = pattern.matcher(lineText);
-				matched = matcher.find();
-			} else {
-				matchedCount = 0;
-				List<String> matchedTexts = matchedTextMode ? Arrays.asList(rule.getMatchText()) :
-					Arrays.asList(rule.getMatchTexts());
-				if(rule.isIgnoreCase()) {
-					lineText = lineText.toUpperCase(Locale.US);
-				}
-				for (String findStr : matchedTexts) {
-					findStr = rule.isIgnoreCase() ? findStr.toUpperCase(Locale.US) : findStr;
-					if(lineText.contains(findStr)) {
-						matchedCount++;
-					}
-				}
-				matched = matchedCount == matchedTexts.size();
-			}
-			
-			if(matched) {
+		for (EntityRule rule : this.source.getRules()) {
+			if(rule.matched(lineText)) {
 				Entity entity = new Entity();
 				//entity.setSource(lineText);
 				entity.setRuleName(rule.getName());
 				
-				String value;
-				Map<String, PropRule> allPropRule = config.getAllPropRule(rule.getName());
+				Object value;
+				Map<String, PropRule> allPropRule = source.getAllPropRule(rule.getName());
 				for (PropRule propRule : allPropRule.values()) {
 					value = propRule.extractFrom(lineText);
 					entity.setPropValue(propRule.getName(), value);

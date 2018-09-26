@@ -35,8 +35,8 @@ public class TestRegex {
 	public void test02() {
 		System.out.println(ParseMode.Boundary);
 		String name = "boundary";
-//		System.out.println(ParseMode.valueOf(name));
-//		System.out.println(Enum.valueOf(ParseMode.class, name));
+		System.out.println(ParseMode.valueOf(name));
+		System.out.println(Enum.valueOf(ParseMode.class, name));
 		
 	}
 }

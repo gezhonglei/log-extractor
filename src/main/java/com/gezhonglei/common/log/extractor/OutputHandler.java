@@ -1,7 +1,5 @@
 package com.gezhonglei.common.log.extractor;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +10,7 @@ import com.gezhonglei.common.log.extractor.config.EntityIndex;
 import com.gezhonglei.common.log.extractor.config.EntityRule;
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
 import com.gezhonglei.common.log.extractor.config.JoinRule;
+import com.gezhonglei.common.log.extractor.config.LogSource;
 import com.gezhonglei.common.log.extractor.config.OutputRule;
 import com.gezhonglei.common.log.extractor.entity.DataRow;
 import com.gezhonglei.common.log.extractor.entity.DataSet;
@@ -190,10 +189,10 @@ public class OutputHandler {
 			addRule(alias, f, rule, results);
 			//results.put(alias, new FieldMapping(alias, rule, f));
 		});
-		config.getCommonPropRules().forEach(prop-> {
+		config.getSource(outputRule.getMainRule()).ifPresent(s -> s.getCommonPropRules().forEach(prop-> {
 			addRule(prop.getName(), prop.getName(), rule, results);
 			//results.put(prop.getName(), new FieldMapping(prop.getName(), rule, prop.getName()));
-		});
+		}));
 		rule.getPropRules().forEach(prop-> {
 			addRule(prop.getName(), prop.getName(), rule, results);
 			//results.put(prop.getName(), new FieldMapping(prop.getName(), rule, prop.getName()));

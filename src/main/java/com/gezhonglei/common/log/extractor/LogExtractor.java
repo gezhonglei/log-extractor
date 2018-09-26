@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
+import com.gezhonglei.common.log.extractor.config.LogSource;
 import com.gezhonglei.common.log.extractor.entity.DataSet;
 import com.gezhonglei.common.log.extractor.entity.DataTable;
 import com.gezhonglei.common.log.extractor.entity.Entity;
@@ -46,25 +47,26 @@ public class LogExtractor {
 	}
 	
 	public ParseResult parse() throws IOException {
-		File file = new File(this.config.getPath());
-		if(!file.exists()) {
-			logger.info("not exist file:{}", file);
-			throw new IOException("File or Directory does not exist");
-		}
-		if(file.isFile()){
-			createTask(file);
-		} else if(file.isDirectory()) {
-			walkDirectory(file.getCanonicalPath(), this.config.getFilter());
-		}
+		
+		this.config.getSources().forEach(s-> {
+			File file = new File(s.getPath());
+			if(!file.exists()) {
+				logger.info("not exist file:{}", file);
+			}
+			if(file.isFile()){
+				createTask(file, s);
+			} else if(file.isDirectory()) {
+				try {
+					walkDirectory(file.getCanonicalPath(), s);
+				} catch (Exception e) {
+					logger.info("Error happends when parsing the path: {}", file);
+				}
+			}
+		});
 		return getResult();
 	}
 	
 	public void writeResult(ParseResult result) throws IOException {
-		File file = new File(this.config.getOutputPath());
-		if(!file.exists()) {
-			logger.info("not exist file:{}", file);
-			throw new IOException("File or Directory does not exist while writing result");
-		}
 		
 		long beginTime = System.currentTimeMillis();
 		logger.debug("Data merge begin");
@@ -73,6 +75,11 @@ public class LogExtractor {
 		logger.debug("Data merge end, cost={}", endTime - beginTime);
 		
 		for (DataTable table : dataSet.getTables()) {
+			File file = new File(this.config.getOutputPath(table.getName()));
+			if(!file.exists()) {
+				file.mkdirs(); 
+			}
+			
 			if(file.isFile()) {
 				this.writeDataTableToFile(table, file);
 			} else if(file.isDirectory()) {
@@ -152,9 +159,9 @@ public class LogExtractor {
 		}
 	}
 	
-	private void createTask(File file) {
+	private void createTask(File file, LogSource source) {
 		if(checkNotInList(file)) {
-			this.tasks.add(new ExtracteTask(file, config, this));
+			this.tasks.add(new ExtracteTask(file, source, this));
 		}
 	}
 
@@ -167,8 +174,8 @@ public class LogExtractor {
 		return true;
 	}
 
-	private void walkDirectory(String path, String pattern) throws IOException {
-		String glob = "glob:**/" + pattern;
+	private void walkDirectory(String path, LogSource source) throws IOException {
+		String glob = "glob:**/" + source.getFilter();
 		
 		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(glob);
 		Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>()
@@ -178,7 +185,7 @@ public class LogExtractor {
 			{
 				if (pathMatcher.matches(path))
 				{
-					createTask(path.toFile());
+					createTask(path.toFile(), source);
 				}
 				return FileVisitResult.CONTINUE;
 			}

@@ -3,6 +3,7 @@ package com.gezhonglei.common.log.extractor.config;
 public enum ParseMode {
 	Boundary("boundary"),
 	Constant("const"),
+	Matched("match"),
 	Regex("regex");
 	
 	String value;

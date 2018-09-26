@@ -1,7 +1,10 @@
-package com.gezhonglei.common.log.extractor.config;
+package com.gezhonglei.common.log.extractor.config.rule;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.gezhonglei.common.log.extractor.config.ParseMode;
+import com.gezhonglei.common.log.extractor.config.PropRule;
 
 public class RegexPropRule extends PropRule {
 	private String regex;
@@ -28,7 +31,7 @@ public class RegexPropRule extends PropRule {
 	}
 	
 	@Override
-	public String extractFrom(String text) {
+	public Object extractFrom(String text) {
 		if(pattern != null) {
 			Matcher matcher = pattern.matcher(text);
 			if(matcher.find()) {

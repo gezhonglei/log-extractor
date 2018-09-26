@@ -1,5 +1,6 @@
-package com.gezhonglei.common.log.extractor.config;
+package com.gezhonglei.common.log.extractor.config.rule;
 
+import com.gezhonglei.common.log.extractor.config.PropRule;
 import com.gezhonglei.common.util.StringUtil;
 
 public class BoundaryPropRule extends PropRule {
@@ -67,7 +68,7 @@ public class BoundaryPropRule extends PropRule {
 	}
 	
 	@Override
-	public String extractFrom(String text) {
+	public Object extractFrom(String text) {
 		int index = 0, indexFrom, indexTo;
 		if(StringUtil.isNonEmpty(beginText)) {
 			int skip = this.beginSkip;

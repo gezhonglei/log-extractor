@@ -3,10 +3,11 @@ package com.gezhonglei.common.log.extractor.config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.gezhonglei.common.log.extractor.config.rule.MatchPropRule;
 
 public class EntityRule {
 	private String name;
@@ -14,11 +15,12 @@ public class EntityRule {
 	private String[] matchTexts;
 	private boolean useRegex;
 	private boolean ignoreCase;
+	
 	@JsonProperty("props")
 	private List<PropRule> propRules;
 	
 	@JsonIgnore
-	private Pattern pattern;
+	private MatchPropRule rule;
 	
 	public String getName() {
 		return name;
@@ -30,22 +32,8 @@ public class EntityRule {
 		return matchText;
 	}
 	
-	public Pattern getPattern() {
-//		if(this.useRegex) {
-//			if(pattern == null) {
-//				pattern = Pattern.compile(matchText);
-//			}
-//		} else {
-//			pattern = null;
-//		}
-		return !this.useRegex ? null : pattern == null ? (pattern=Pattern.compile(matchText)) : pattern;
-	}
-	
 	public void setMatchText(String matchText) {
 		this.matchText = matchText;
-		if(this.useRegex) {
-			this.pattern = Pattern.compile(matchText);
-		}
 	}
 	public boolean isUseRegex() {
 		return useRegex;
@@ -70,5 +58,27 @@ public class EntityRule {
 	}
 	public void setMatchTexts(String[] matchTexts) {
 		this.matchTexts = matchTexts;
+	}
+	
+	public boolean matched(String text) {
+		return this.getMatchRule().isMatched(text);
+	}
+	
+	private MatchPropRule getMatchRule() {
+		if(this.rule == null) {
+			this.reloadMatchRule();
+		}
+		return this.rule;
+	}
+	
+	/**
+	 * <b>reloadMatchRule</b> is required after the properties is modified
+	 */
+	public void reloadMatchRule() {
+		this.rule = new MatchPropRule();
+		this.rule.setMatchText(this.matchText);
+		this.rule.setMatchTexts(this.matchTexts);
+		this.rule.setUseRegex(this.useRegex);
+		this.rule.setIgnoreCase(this.ignoreCase);
 	}
 }

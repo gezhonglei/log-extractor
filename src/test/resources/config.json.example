@@ -6,8 +6,13 @@
             "type": "date",
             "format": "yyyy-MM-dd HH:mm:ss,SSS",
             "mod": "regex",
-            "regex": "\\s(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s",
-            "groupIndex": "1"
+            "regex": "\\s?(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s",
+            "groupIndex": 1
+        },
+        "logtime2": {
+            "mod": "regex",
+            "beginIndex": 0,
+            "length": 23
         },
         "id": {
             "type": "string",
