@@ -1,0 +1,129 @@
+{
+	"sources" : [{
+		"path" : "/path/to/log/dir",		# the path to the log directoty
+		"filter" : "*.log",					# filter the files with the postfix .log
+		"commonProps" : [{					# common properties shared by each rule.
+					"name" : "logtime",		# required, should be unique globaly
+					"mod" : "regex",		# optional, boudary is the default mode
+					"regex" : "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s",
+					"groupIndex" : 1
+				}, {
+					"name" : "logtime2",
+					"mod" : "regex",
+					"beginIndex" : 0,
+					"length" : 23
+				}, {
+					"name" : "logtime3",
+					"mod" : "regex",
+					"beginIndex" : 0,
+					"endIndex" : 22
+				}, {
+					"name" : "id",
+					"type" : "string",
+					"beginText" : "id=",
+					"endText" : ",",
+					"leftIncluded" : false,
+					"rightIncluded" : false
+				}],
+		"rules" : [{
+					"name" : "sendCmd",
+					"matchText" : "sendRequest: cmd=\\((con|disc)\\)",
+					"useRegex" : true,
+					"props" : {
+						"cmd" : {
+							"beginSkip" : 0,
+							"beginText" : "cmd=",
+							"endText" : ","
+						},
+						"id" : {
+							"beginIndex" : 0,
+							"endIndex" : 0
+						},
+						"id2" : {
+							"beginIndex" : 0,
+							"length" : 0
+						},
+						"id3" : {
+							"beginText" : "id=",
+							"endText" : ",",
+							"leftIncluded" : false,
+							"rightIncluded" : false
+						},
+						"ipAndPort" : {
+							"beginText" : "ip=",
+							"endText" : ",",
+							"leftIncluded" : false,
+							"rightIncluded" : false
+						},
+						"addr" : {
+							"beginText" : "<Addr=",
+							"length" : ">",
+							"leftIncluded" : false,
+							"rightIncluded" : false
+						}
+					}
+				}, {
+					"name" : "intercepted",
+					"matchText" : "sendRequest: socket=",
+					"useRegex" : false,
+					"ignoreCase" : false
+				}, {
+					"name" : "requestTimeout",
+					"matchText" : "RequestEntryTime:",
+					"useRegex" : false,
+					"ignoreCase" : false
+				}, {
+					"name" : "excuted",
+					"matchText" : "execute\\((con|disc)\\)",
+					"useRegex" : true,
+					"ignoreCase" : false,
+					"props" : {
+						"totalCost" : {
+							"beginText" : "totalCost=",
+							"endText" : ","
+						},
+						"sendCost" : {
+							"beginText" : "sendCost=",
+							"endText" : ","
+						},
+						"recvCost" : {
+							"beginText" : "recvCost=",
+							"endText" : ","
+						},
+						"send" : {
+							"beginText" : "send=",
+							"endText" : ","
+						},
+						"recv" : {
+							"beginText" : "recv=",
+							"endText" : ","
+						}
+					}
+				}]
+	}, {
+		
+	}],
+	"output" : [{
+				"name" : "sendCmd"  # required
+			}, {
+				"name" : "excuted"	# required
+			}, {
+				"name" : "sendCmd-join",	# required
+				"mainRule" : "sendCmd",		# the default value is equal to the name property 
+				"mainRuleFieldAlias" : {	# alias 
+					"logtime" : "time",		# left --- the property name from the mainRule; right --- the alias
+					"total" : "totalCost"
+				},
+				"joins" : [{
+							"entityRuleName" : "excuted",
+							"keyMapping" : {
+								"id" : "id"
+							},
+							"fieldAlias" : {
+								"total" : "totalCost"
+								,
+							}
+						}],
+				"fields" : ["id", "time", "cmd", "totalCost", "recv"] # specify the order of fields to ouput
+			}]
+}

@@ -222,8 +222,8 @@ public class LogExtractor {
 	
 	public void notify(ExtracteTask task) {
 		if(countDown != null) {
-			logger.info("progress: {}/{}", tasks.size() - countDown.getCount() + 1, tasks.size());
 			countDown.countDown();
+			logger.info("progress: {}/{}", tasks.size() - countDown.getCount(), tasks.size());
 		}
 	}
 }

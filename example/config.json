@@ -1,0 +1,205 @@
+{
+	"sources": [{
+	    "path": "log1",
+	    "filter": "*.log",
+	    "commonProps": [
+	        { 
+	        	"name": "logtime",
+	            "type": "date",
+	            "format": "yyyy-MM-dd HH:mm:ss,SSS",
+	            "mode": "regex",
+	            "regex": "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s",
+	            "groupIndex": 1
+	        }, {
+	        	"name": "id",
+	            "type": "string",
+	            "beginText": "requestId=",
+	            "endText": ","
+	        },
+	        {
+	        	"name": "tag",
+	            "type": "string",
+	            "beginText": "tag=",
+	            "endText": ","
+	        }
+	    ],
+	    "rules": [
+	        {
+	            "name": "sendCmd",
+	            "matchText": "sendRequest: cmd=(con|get|conTest|disc)",
+	            "useRegex": true,
+	            "ignoreCase": false,
+	            "props": [
+	                {
+	                	"name": "cmd",
+	                    "beginText": "cmd=",
+	                    "endText": ","
+	                },
+	                {
+	                	"name": "addr",
+	                    "beginText": "<addr=",
+	                    "endText": ">"
+	                },
+	                {
+	                	"name": "isSSL",
+	                    "beginText": "isSSL=",
+	                    "endText": ","
+	                }
+	            ]
+	        }, {
+	            "name": "executed",
+	            "matchText": "execute\\((con|conTest|get|disc)\\)",
+	            "useRegex": true,
+	            "ignoreCase": false,
+	            "props": [
+	            	{
+	                	"name": "status",
+	                    "beginText": "status=",
+	                    "endText": ","
+	                },
+	                {
+	                	"name": "totalCost",
+	                    "beginText": "totalCost=",
+	                    "endText": ","
+	                },
+	                {
+	                	"name": "sendCost",
+	                    "beginText": "sendCost=",
+	                    "endText": ","
+	                },
+	                {
+	                	"name": "recvCost",
+	                    "beginText": "recvCost="
+	                },
+	                {
+	                	"name": "send",
+	                    "beginText": "send=",
+	                    "endText": ","
+	                }, 
+	                {
+	                	"name": "recv",
+	                    "beginText": "recv=",
+	                    "endText": ","
+	                }, {
+		            	"mode": "const", 
+		            	"name": "result",
+		            	"value": "executed"
+		            }
+	            ]
+	        }
+	    ]
+	}, {
+	    "path": "log2",
+	    "filter": "*.log",
+	    "commonProps": [
+	        { 
+	        	"name": "logtime",
+	            "type": "date",
+	            "format": "yyyy-MM-dd HH:mm:ss,SSS",
+	            "mode": "regex",
+	            "regex": "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3})\\s",
+	            "groupIndex": 1
+	        }, {
+	        	"name": "id",
+	            "type": "string",
+	            "beginText": "requestId=",
+	            "endText": ","
+	        },
+	        {
+	        	"name": "tag",
+	            "type": "string",
+	            "beginText": "tag=",
+	            "endText": ","
+	        }
+	    ],
+	    "rules": [{
+	            "name": "requestTimeout",
+	            "matchText": "RequestEntry: timeout",
+	            "useRegex": false,
+	            "ignoreCase": false,
+	            "props": [{
+	            	"mode": "const", 
+	            	"name": "result",
+	            	"value": "timeout"
+	            },
+		        {
+		        	"name": "tag",
+		            "type": "string",
+		            "beginText": "tag="
+		        }]
+	        }, {
+	            "name": "intecepted",
+	            "matchText": "Intecepted: no need to send",
+	            "useRegex": false,
+	            "ignoreCase": false,
+	            "props": [{
+	            	"mode": "const", 
+	            	"name": "result",
+	            	"value": "intecepted"
+	            }, {
+		        	"name": "tag",
+		            "type": "string",
+		            "beginText": "tag="
+		        }]
+	        }
+	    ]
+	}],
+	"outputPath": "log",
+    "output": [
+        {
+            "name": "executed"
+        }, 
+        {
+            "name": "intecepted"
+        }, 
+        {
+            "name": "requestTimeout"
+        }, 
+        {
+            "name": "sendCmd-join",
+            "mainRule": "sendCmd",
+            "mainRuleFieldAlias": {
+                "logtime": "time"
+            },
+            "joins": [
+                { 
+                    "joinRuleName": "executed",
+                    "keyMapping": {
+                        "id": "id"
+                    },
+                    "fieldAlias": {
+                        "logtime": "endTime"
+                    }
+                },
+                { 
+                    "joinRuleName": "requestTimeout",
+                    "keyMapping": {
+                        "id": "id"
+                    },
+                    "fieldAlias": {
+                        "logtime": "endTime"
+                    }
+                },
+                { 
+                    "joinRuleName": "intecepted",
+                    "keyMapping": {
+                        "id": "id"
+                    },
+                    "fieldAlias": {
+                        "logtime": "endTime"
+                    }
+                }
+            ],
+            "fields": [
+                "id",
+                "time",
+                "cmd",
+                "result",
+                "endTime",
+                "totalCost",
+                "recv",
+                "send"
+            ]
+        }
+    ]
+}

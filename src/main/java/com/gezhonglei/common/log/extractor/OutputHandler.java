@@ -10,7 +10,6 @@ import com.gezhonglei.common.log.extractor.config.EntityIndex;
 import com.gezhonglei.common.log.extractor.config.EntityRule;
 import com.gezhonglei.common.log.extractor.config.ExtracteConfig;
 import com.gezhonglei.common.log.extractor.config.JoinRule;
-import com.gezhonglei.common.log.extractor.config.LogSource;
 import com.gezhonglei.common.log.extractor.config.OutputRule;
 import com.gezhonglei.common.log.extractor.entity.DataRow;
 import com.gezhonglei.common.log.extractor.entity.DataSet;
